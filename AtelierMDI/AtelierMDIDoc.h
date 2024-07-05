@@ -13,7 +13,23 @@ protected: // création à partir de la sérialisation uniquement
 	DECLARE_DYNCREATE(CAtelierMDIDoc)
 
 // Attributs
+private:
+	CPoint m_pos;
 public:
+	const CPoint& GetPos() const { return m_pos; }
+	void SetPos(CView *from, const POINT& pos) { 
+		m_pos = pos; 
+		SetModifiedFlag(TRUE);
+		UpdateAllViews(from);
+	}
+	const CSize& GetTotalSize() const {
+		return m_pos 
+			+ GetRadius();
+	}
+	SIZE GetRadius() const
+	{
+		return { 100, 100 };
+	}
 
 // Opérations
 public:

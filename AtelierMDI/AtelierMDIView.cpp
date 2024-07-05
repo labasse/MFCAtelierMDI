@@ -29,6 +29,7 @@ BEGIN_MESSAGE_MAP(CAtelierMDIView, CScrollView)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CAtelierMDIView::OnFilePrintPreview)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
+	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 // construction/destruction de CAtelierMDIView
@@ -53,24 +54,29 @@ BOOL CAtelierMDIView::PreCreateWindow(CREATESTRUCT& cs)
 
 // dessin de CAtelierMDIView
 
-void CAtelierMDIView::OnDraw(CDC* /*pDC*/)
+void CAtelierMDIView::OnDraw(CDC* pDC)
 {
 	CAtelierMDIDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;
-
-	// TODO: ajoutez ici le code de dessin pour les données natives
+	
+	auto oldpen = pDC->SelectStockObject(BLACK_PEN);
+	CRect rc(pDoc->GetPos(), pDoc->GetPos());
+	
+	rc.InflateRect(pDoc->GetRadius());
+	pDC->Ellipse(rc);
+	pDC->SelectObject(oldpen);
 }
 
 void CAtelierMDIView::OnInitialUpdate()
 {
 	CScrollView::OnInitialUpdate();
-
-	CSize sizeTotal;
-	// TODO: calculez la taille totale de cette vue
-	sizeTotal.cx = sizeTotal.cy = 100;
-	SetScrollSizes(MM_TEXT, sizeTotal);
+	
+	SetScrollSizes(
+		MM_TEXT, 
+		GetDocument()->GetTotalSize()
+	);
 }
 
 
@@ -136,3 +142,20 @@ CAtelierMDIDoc* CAtelierMDIView::GetDocument() const // la version non Debug est
 
 
 // gestionnaires de messages de CAtelierMDIView
+
+
+void CAtelierMDIView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	GetDocument()->SetPos(this, point);
+	Invalidate();
+	CScrollView::OnLButtonDown(nFlags, point);
+}
+
+
+void CAtelierMDIView::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/)
+{
+	SetScrollSizes(
+		MM_TEXT,
+		GetDocument()->GetTotalSize()
+	);
+}
